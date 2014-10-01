@@ -28,7 +28,9 @@
       "manualControls": "",     // Selector: Declare custom pager navigation
       "namespace": "rslides",   // String: change the default namespace used
       "before": $.noop,         // Function: Before callback
-      "after": $.noop           // Function: After callback
+      "after": $.noop,          // Function: After callback
+      "lazy": true,             // Boolean: Support lazily loading images
+      "lazyAttr": "data-src"    // String: Attribute that stores image src value
     }, options);
 
     return this.each(function () {
@@ -93,6 +95,17 @@
 
         // Fading animation
         slideTo = function (idx) {
+          if (settings.lazy) {
+            var $img = $slide.eq(idx).find('img');
+            var s = $img.attr('data-src');
+            if (s) {
+              $img
+                .on('load', function() { slideTo(idx); })
+                .removeAttr('data-src')
+                .attr('src', s);
+              return;
+            }
+          }
           settings.before(idx);
           // If CSS3 transitions are supported
           if (supportsTransitions) {
